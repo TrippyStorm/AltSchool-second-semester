@@ -1,1 +1,6 @@
-
+# Excersice 
+| No. | Question | Solution |
+|---------------------------|
+| 1 | Change directory to the tests directory using absolute pathname | cd /home/altschool/tests |
+| 2 | Change directory to the tests directory using relative pathname | cd tests |
+| 3 | Use echo command to create a file named fileA with text content ‘Hello A’ in the misc directory | echo "Hello A" > /home/altschool/misc/fileA |
