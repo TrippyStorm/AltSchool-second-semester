@@ -1,1 +1,84 @@
-# Question 
+#  Deploy an open source app on GitHub using ansible, your ansible slave will consist of one ubuntu node and one centos(rhel) node.
+Your master node can be of any Linux distribution of your choice(3 nodes in all).
+Explore using variables in ansible while executing this task.
+
+
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  
+   # CentOS 7 VM
+   config.vm.define "centos" do |centos|
+     centos.vm.box = "centos/7"
+     centos.vm.hostname = "centos-slave"
+     centos.vm.network "private_network", type: "dhcp"
+     centos.vm.network "forwarded_port", guest: 80, host: 8082
+   end
+
+ 
+   # Debian 10 VM
+   config.vm.define "debian" do |debian|
+     debian.vm.box = "debian/buster64"
+     debian.vm.hostname = "debian-slave"
+     debian.vm.network "private_network", type: "dhcp"
+     debian.vm.network "forwarded_port", guest: 80, host: 8081
+   end
+ 
+   # Ubuntu 20.04 VM
+   config.vm.define "master" do |master|
+     master.vm.box = "ubuntu/focal64"
+     master.vm.hostname = "master-node"
+     master.vm.network "private_network", type: "dhcp"
+     master.vm.network "forwarded_port", guest: 80, host: 8080
+   end
+ 
+ end
+
+---
+- name: install nginx
+  hosts: all
+  become: true
+  tasks:
+    - name: install nginx
+      apt:
+        name: nginx
+        state: latest
+      when: ansible_os_family == 'Debian'
+    - name: start nginx
+      service:
+        name: nginx
+        state: started
+        enabled: true 
+      when: ansible_os_family == 'Debian'
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted
+      when: ansible_os_family == 'Debian'
+
+    - name: install httpd
+      dnf:
+        name: httpd
+        state: latest
+      when: ansible_os_family == 'Redhat'
+    - name: start httpd
+      service:
+        name: httpd
+        state: started
+        enabled: true 
+      when: ansible_os_family == 'Redhat'
+    - name: restart httpd
+      service:
+        name: httpd
+        state: restarted
+      when: ansible_os_family == 'Redhat'
+    - name: copy our custom page
+      ansible.builtin.copy:
+        src: /home/vagrant/.ansible/FIGMA_ALTSCHOOL_AFRICA_assignment_3/
+        dest: /var/www/html/
+        owner: root
+        group: root
+        mode: '0644'
+
+
